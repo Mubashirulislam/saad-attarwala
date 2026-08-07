@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Parchment surface — the catalog is a price table people scan on
+       their phone in daylight, so the page body stays light. The oud-ink
+       dark brown lives in the header/nav chrome instead, not the whole page. */
+    --background: 40 33% 94%;         /* parchment #F4EEE3 */
+    --foreground: 20 24% 10%;         /* ink #1B140F */
+
+    --card: 40 33% 97%;
+    --card-foreground: 20 24% 10%;
+
+    --primary: 20 24% 10%;            /* ink, for primary buttons/nav */
+    --primary-foreground: 40 33% 96%;
+
+    --secondary: 40 20% 88%;
+    --secondary-foreground: 20 24% 10%;
+
+    --muted: 40 18% 90%;
+    --muted-foreground: 25 15% 38%;   /* glass #6B5744 */
+
+    --accent: 38 58% 45%;             /* amber resin #B9812F */
+    --accent-foreground: 40 33% 97%;
+
+    --destructive: 12 46% 42%;        /* clay #A8503A */
+    --destructive-foreground: 40 33% 97%;
+
+    --success: 108 15% 42%;           /* sage #5F7A5E */
+    --success-foreground: 40 33% 97%;
+
+    --border: 40 15% 82%;
+    --input: 40 15% 82%;
+    --ring: 38 58% 45%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  /* All numerals — prices, sizes, order numbers, tracking IDs — render in
+     Geist Mono throughout both apps. This is the one quiet signature detail
+     the brand direction leans on instead of a logomark. */
+  .tabular {
+    font-family: var(--font-geist-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
