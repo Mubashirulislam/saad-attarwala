@@ -113,10 +113,12 @@ export function Sidebar({ staffName }: { staffName: string }) {
         </div>
       </aside>
 
-      {/* Desktop sidebar — unchanged behavior, just hidden below md. */}
+      {/* Desktop sidebar — sticky so it stays pinned to the viewport while
+          the page content scrolls, instead of scrolling away with it on any
+          page taller than the screen. */}
       <aside
         className={cn(
-          "hidden shrink-0 flex-col bg-ink text-parchment transition-[width] duration-200 md:flex",
+          "sticky top-0 hidden h-screen shrink-0 flex-col bg-ink text-parchment transition-[width] duration-200 md:flex",
           collapsed ? "w-16" : "w-56"
         )}
       >
