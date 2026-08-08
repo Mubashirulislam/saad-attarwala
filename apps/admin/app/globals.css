@@ -54,3 +54,20 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* iOS Safari auto-zooms into any focused input/select/textarea whose
+   font-size is under 16px. Force 16px there specifically — not desktop,
+   where the smaller text-xs/text-sm sizes are the intended design — rather
+   than disabling pinch-zoom via the viewport meta tag, which would be an
+   accessibility regression for anyone who needs to zoom for readability.
+   Deliberately outside any @layer block: unlayered CSS always wins over
+   Tailwind's utility classes (which live in @layer utilities) regardless
+   of selector specificity, so this reliably overrides text-xs/text-sm on
+   form elements without needing !important. */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
