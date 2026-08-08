@@ -16,5 +16,10 @@ export async function POST(request: NextRequest) {
   }
 
   revalidatePath("/");
+  // Also invalidate every brand's own page — revalidatePath("/") only
+  // covers the homepage, and /brand/[slug] is a sibling route, not nested
+  // under it, so it was never getting the instant update, only its own 60s
+  // ISR window.
+  revalidatePath("/brand/[slug]", "page");
   return NextResponse.json({ revalidated: true, now: Date.now() });
 }
