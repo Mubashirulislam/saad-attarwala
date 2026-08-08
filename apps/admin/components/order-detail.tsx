@@ -252,7 +252,7 @@ function CustomerDetailsForm({
       <button
         onClick={save}
         disabled={saving}
-        className="rounded-md bg-primary text-primary-foreground px-3 py-2 text-sm font-medium disabled:opacity-50"
+        className="w-full rounded-md bg-primary text-primary-foreground px-3 py-2 text-sm font-medium disabled:opacity-50"
       >
         {saving ? "Saving…" : "Save customer details"}
       </button>
@@ -362,7 +362,7 @@ function StatusActions({
         <button
           onClick={onRequestDelete}
           disabled={updating}
-          className="w-full text-xs font-medium text-destructive hover:underline disabled:opacity-50"
+          className="w-full text-sm font-medium text-destructive hover:underline disabled:opacity-50"
         >
           Delete order permanently
         </button>
