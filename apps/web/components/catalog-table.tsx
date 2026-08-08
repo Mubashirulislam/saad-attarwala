@@ -119,7 +119,6 @@ export function CatalogTable({ catalog }: { catalog: CatalogFragrance[] }) {
                 slug={fragrances[0]?.brand_slug}
                 logoUrl={fragrances[0]?.brand_logo_url ?? null}
                 fragrances={fragrances}
-                sizeColumns={sizeColumns}
               />
             ))}
           </div>
@@ -211,14 +210,19 @@ function BrandSection({
   slug,
   logoUrl,
   fragrances,
-  sizeColumns,
 }: {
   brandName: string;
   slug?: string;
   logoUrl: string | null;
   fragrances: CatalogFragrance[];
-  sizeColumns: number[];
 }) {
+  // Scoped to just this brand's own sizes, not the union across the whole
+  // catalog — a brand that only ever sells 12/6/3ml shouldn't show empty
+  // 100ml/50ml columns just because some other brand offers those sizes.
+  const sizeColumns = Array.from(
+    new Set(fragrances.flatMap((f) => f.variants.map((v) => v.size_ml)))
+  ).sort((a, b) => b - a);
+
   return (
     <section id={slug ? `brand-${slug}` : undefined} className="scroll-mt-20">
       {/* Sticky on every breakpoint — the header travels with you while
