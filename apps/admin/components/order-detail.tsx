@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Check, Copy } from "lucide-react";
 import type { Order, OrderItem } from "@saad/database";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { StatusBadge } from "@/components/status-badge";
@@ -106,6 +107,11 @@ export function OrderDetail({ order: initialOrder, items }: { order: Order; item
         </div>
       </div>
 
+      {/* Outside the card on purpose, not inside it — the card above stays
+          screenshot-clean, this is the text-based alternative for pasting
+          straight into WhatsApp instead. */}
+      <CopySummaryButton order={order} items={items} />
+
       <div className="grid gap-4 sm:grid-cols-2">
         <CustomerDetailsForm order={order} onSaved={setOrder} />
         <StatusActions
@@ -139,6 +145,52 @@ export function OrderDetail({ order: initialOrder, items }: { order: Order; item
         onCancel={() => setConfirmingDelete(false)}
       />
     </div>
+  );
+}
+
+// *bold* is WhatsApp's own markdown, not decoration — this is meant to be
+// pasted straight into a chat, so it renders bold there without Saad having
+// to add formatting by hand.
+function buildOrderSummaryText(order: Order, items: OrderItem[]) {
+  const lines = [
+    `*Saad Attarwala* — Order ${order.order_number}`,
+    "",
+    ...items.map(
+      (item) =>
+        `${item.fragrance_name_snapshot} (${item.brand_name_snapshot}) — ${item.size_ml_snapshot}ml x${item.quantity} — ₹${rupee(item.line_total_inr)}`
+    ),
+    "",
+    `Subtotal: ₹${rupee(order.subtotal_inr)}`,
+    `Delivery: ₹${rupee(order.delivery_fee_inr)}`,
+    `*Total: ₹${rupee(order.total_inr)}*`,
+  ];
+  return lines.join("\n");
+}
+
+function CopySummaryButton({ order, items }: { order: Order; items: OrderItem[] }) {
+  const showToast = useToast();
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(buildOrderSummaryText(order, items));
+      setCopied(true);
+      showToast("Copied — paste it straight into WhatsApp.");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      showToast("Couldn't copy — your browser may be blocking clipboard access.", "error");
+    }
+  }
+
+  return (
+    <button
+      onClick={copy}
+      disabled={items.length === 0}
+      className="flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-secondary disabled:opacity-50"
+    >
+      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+      {copied ? "Copied" : "Copy for customer"}
+    </button>
   );
 }
 
