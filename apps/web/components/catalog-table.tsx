@@ -20,6 +20,13 @@ function startingPrice(f: CatalogFragrance) {
   return Math.min(...inStock.map((v) => v.price_inr));
 }
 
+// Every size that exists has been marked out of stock — distinct from a
+// fragrance with no sizes entered yet at all, which just isn't priced yet
+// rather than sold out.
+function isOutOfStock(f: CatalogFragrance) {
+  return f.variants.length > 0 && f.variants.every((v) => !v.in_stock);
+}
+
 export function CatalogTable({ catalog }: { catalog: CatalogFragrance[] }) {
   const [query, setQuery] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("brand");
@@ -258,50 +265,78 @@ export function FragranceTable({
             </tr>
           </thead>
           <tbody>
-            {fragrances.map((f, i) => (
-              <tr key={f.fragrance_id} className={cn(i % 2 === 1 && "bg-card/50")}>
-                <td className="px-4 py-2">{f.fragrance_name}</td>
-                {showBrandColumn && (
-                  <td className="px-4 py-2 text-muted-foreground">{f.brand_name}</td>
-                )}
-                {sizeColumns.map((size) => {
-                  const variant = f.variants.find((v) => v.size_ml === size);
-                  return (
-                    <td key={size} className="px-4 py-2 text-right tabular">
-                      {variant && variant.in_stock ? `₹${rupee(variant.price_inr)}` : "—"}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+            {fragrances.map((f, i) => {
+              const outOfStock = isOutOfStock(f);
+              return (
+                <tr
+                  key={f.fragrance_id}
+                  className={cn(i % 2 === 1 && "bg-card/50", outOfStock && "opacity-60")}
+                >
+                  <td className="px-4 py-2">
+                    {f.fragrance_name}
+                    {outOfStock && (
+                      <span className="ml-2 rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                        Out of stock
+                      </span>
+                    )}
+                  </td>
+                  {showBrandColumn && (
+                    <td className="px-4 py-2 text-muted-foreground">{f.brand_name}</td>
+                  )}
+                  {sizeColumns.map((size) => {
+                    const variant = f.variants.find((v) => v.size_ml === size);
+                    return (
+                      <td key={size} className="px-4 py-2 text-right tabular">
+                        {variant && variant.in_stock ? `₹${rupee(variant.price_inr)}` : "—"}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
       {/* Card view — mobile */}
       <div className="md:hidden space-y-2">
-        {fragrances.map((f) => (
-          <div key={f.fragrance_id} className="rounded-lg border border-border bg-card p-3">
-            <div className="flex items-baseline justify-between">
-              <span className="font-medium">{f.fragrance_name}</span>
-              {showBrandColumn && (
-                <span className="text-xs text-muted-foreground">{f.brand_name}</span>
+        {fragrances.map((f) => {
+          const outOfStock = isOutOfStock(f);
+          return (
+            <div
+              key={f.fragrance_id}
+              className={cn(
+                "rounded-lg border border-border bg-card p-3",
+                outOfStock && "opacity-60"
+              )}
+            >
+              <div className="flex items-baseline justify-between">
+                <span className="font-medium">{f.fragrance_name}</span>
+                {showBrandColumn && (
+                  <span className="text-xs text-muted-foreground">{f.brand_name}</span>
+                )}
+              </div>
+              {outOfStock ? (
+                <p className="mt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Out of stock
+                </p>
+              ) : (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {f.variants
+                    .filter((v) => v.in_stock)
+                    .map((v) => (
+                      <span
+                        key={v.size_ml}
+                        className="rounded-md bg-secondary px-2 py-1 text-xs tabular"
+                      >
+                        {v.size_ml}ml — ₹{rupee(v.price_inr)}
+                      </span>
+                    ))}
+                </div>
               )}
             </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {f.variants
-                .filter((v) => v.in_stock)
-                .map((v) => (
-                  <span
-                    key={v.size_ml}
-                    className="rounded-md bg-secondary px-2 py-1 text-xs tabular"
-                  >
-                    {v.size_ml}ml — ₹{rupee(v.price_inr)}
-                  </span>
-                ))}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </>
   );
