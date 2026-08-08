@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus, Pencil, Trash2 } from "lucide-react";
+import { ImagePlus, PackageCheck, PackageX, Pencil, Trash2 } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { slugify } from "@/lib/slug";
 import { cn } from "@/lib/utils";
@@ -479,6 +479,21 @@ function FragranceRowEditor({
     onFragranceDeleted(fragrance.id);
   }
 
+  // One click, no form — this is the action Saad reaches for most, so it
+  // shouldn't require opening the edit form just to flip a boolean. The web
+  // catalog already hides out-of-stock sizes/shows "—" for them, so this is
+  // the only step needed for it to show up there.
+  async function toggleStock(variant: VariantRow) {
+    const { data, error } = await supabaseBrowser
+      .from("variants")
+      .update({ in_stock: !variant.in_stock })
+      .eq("id", variant.id)
+      .select()
+      .single();
+    if (error) return showToast(error.message, "error");
+    onVariantUpdated(data);
+  }
+
   const sortedVariants = [...variants].sort((a, b) => b.size_ml - a.size_ml);
   const editingVariant = sortedVariants.find((v) => v.id === editingVariantId) ?? null;
 
@@ -489,17 +504,33 @@ function FragranceRowEditor({
         <div className="flex items-center gap-2">
           <div className="flex flex-wrap gap-1.5 justify-end">
             {sortedVariants.map((v) => (
-              <button
+              <span
                 key={v.id}
-                onClick={() => setEditingVariantId(v.id)}
-                title="Click to edit this size"
                 className={cn(
-                  "rounded bg-card border px-2 py-0.5 text-xs tabular hover:border-accent",
-                  v.id === editingVariantId ? "border-accent" : "border-border"
+                  "inline-flex items-center overflow-hidden rounded border bg-card text-xs tabular",
+                  v.id === editingVariantId ? "border-accent" : "border-border",
+                  !v.in_stock && "opacity-60"
                 )}
               >
-                {v.size_ml}ml · ₹{v.price_inr}
-              </button>
+                <button
+                  onClick={() => setEditingVariantId(v.id)}
+                  title="Click to edit this size"
+                  className={cn("px-2 py-0.5 hover:text-accent", !v.in_stock && "line-through")}
+                >
+                  {v.size_ml}ml · ₹{v.price_inr}
+                </button>
+                <button
+                  onClick={() => toggleStock(v)}
+                  title={v.in_stock ? "Mark out of stock" : "Mark back in stock"}
+                  className="border-l border-border px-1.5 py-0.5 text-muted-foreground hover:text-foreground"
+                >
+                  {v.in_stock ? (
+                    <PackageCheck className="h-3 w-3" />
+                  ) : (
+                    <PackageX className="h-3 w-3" />
+                  )}
+                </button>
+              </span>
             ))}
           </div>
           <button
