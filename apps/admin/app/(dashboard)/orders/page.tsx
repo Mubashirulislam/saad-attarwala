@@ -89,7 +89,10 @@ export default async function OrdersPage({
 
       {error && <p className="text-destructive text-sm">Couldn't load orders: {error.message}</p>}
 
-      <div className="rounded-lg border border-border overflow-hidden">
+      {/* Table — desktop/tablet. A 5-column table doesn't reflow onto a
+          phone width usefully, so it's replaced with cards below md
+          instead of just scrolling sideways. */}
+      <div className="hidden md:block rounded-lg border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-secondary/60 text-left">
             <tr>
@@ -137,6 +140,37 @@ export default async function OrdersPage({
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Cards — mobile. The whole card is a tap target, same "stretched
+          link" approach as the desktop row. */}
+      <div className="space-y-2 md:hidden">
+        {orders?.map((order) => (
+          <Link
+            key={order.id}
+            href={`/orders/${order.id}`}
+            className="block rounded-lg border border-border bg-card p-3"
+          >
+            <div className="flex items-center justify-between">
+              <span className="tabular font-medium">{order.order_number}</span>
+              <StatusBadge status={order.status} />
+            </div>
+            <div className="mt-1.5 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                {order.customer_name ?? "Not added yet"}
+              </span>
+              <span className="tabular font-medium">₹{order.total_inr}</span>
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              {new Date(order.created_at).toLocaleDateString("en-IN")}
+            </div>
+          </Link>
+        ))}
+        {orders?.length === 0 && (
+          <p className="rounded-lg border border-border px-4 py-8 text-center text-sm text-muted-foreground">
+            No orders yet — start one from a customer's WhatsApp message.
+          </p>
+        )}
       </div>
     </div>
   );
