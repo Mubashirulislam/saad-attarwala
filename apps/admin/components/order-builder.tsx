@@ -185,18 +185,18 @@ export function OrderBuilder() {
 
       <aside className="rounded-lg border border-border bg-card p-4 space-y-3 h-fit">
         <h2 className="font-medium text-sm">Order summary</h2>
-        <div className="text-sm space-y-1.5 tabular">
+        <div className="text-sm space-y-1.5">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Subtotal</span>
-            <span>₹{rupee(subtotal)}</span>
+            <span className="tabular">₹{rupee(subtotal)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Delivery</span>
-            <span>₹{items.length > 0 ? DELIVERY_FEE : 0}</span>
+            <span className="tabular">₹{items.length > 0 ? DELIVERY_FEE : 0}</span>
           </div>
           <div className="flex justify-between font-semibold text-base border-t border-border pt-1.5 mt-1.5">
             <span>Total</span>
-            <span>₹{rupee(total)}</span>
+            <span className="tabular">₹{rupee(total)}</span>
           </div>
         </div>
         <button
