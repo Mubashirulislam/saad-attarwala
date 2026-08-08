@@ -60,14 +60,15 @@
    where the smaller text-xs/text-sm sizes are the intended design — rather
    than disabling pinch-zoom via the viewport meta tag, which would be an
    accessibility regression for anyone who needs to zoom for readability.
-   Deliberately outside any @layer block: unlayered CSS always wins over
-   Tailwind's utility classes (which live in @layer utilities) regardless
-   of selector specificity, so this reliably overrides text-xs/text-sm on
-   form elements without needing !important. */
+   !important is genuinely needed here: this build doesn't emit Tailwind's
+   @layer blocks into the compiled CSS (verified directly in .next/static),
+   so it's plain cascade rules, and a class selector like .text-sm always
+   beats a plain element selector like `input` on specificity alone,
+   regardless of source order. */
 @media (max-width: 640px) {
   input,
   select,
   textarea {
-    font-size: 16px;
+    font-size: 16px !important;
   }
 }
