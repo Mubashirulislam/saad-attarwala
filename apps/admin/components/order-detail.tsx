@@ -9,6 +9,7 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 import { StatusBadge } from "@/components/status-badge";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useToast } from "@/components/toast";
+import { cn } from "@/lib/utils";
 
 const rupee = (n: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(n);
@@ -228,26 +229,39 @@ function CustomerDetailsForm({
   return (
     <div className="rounded-lg border border-border p-4 space-y-3">
       <h2 className="text-sm font-medium">Customer</h2>
+      {/* Each field gets its own copy button rather than one combined
+          block — BlueDart's booking form has separate Name/Phone/Address
+          fields, so copying them one at a time to paste in there beats
+          pasting one block and manually splitting it up. */}
       <div className="space-y-2">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        />
-        <input
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="Phone"
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        />
-        <textarea
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Delivery address"
-          rows={3}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        />
+        <div className="relative">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 pr-9 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <CopyFieldButton value={name} />
+        </div>
+        <div className="relative">
+          <input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Phone"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 pr-9 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <CopyFieldButton value={phone} />
+        </div>
+        <div className="relative">
+          <textarea
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Delivery address"
+            rows={3}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 pr-9 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <CopyFieldButton value={address} align="top" />
+        </div>
       </div>
       <button
         onClick={save}
@@ -257,6 +271,38 @@ function CustomerDetailsForm({
         {saving ? "Saving…" : "Save customer details"}
       </button>
     </div>
+  );
+}
+
+function CopyFieldButton({ value, align = "center" }: { value: string; align?: "center" | "top" }) {
+  const showToast = useToast();
+  const [copied, setCopied] = useState(false);
+
+  if (!value.trim()) return null;
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(value.trim());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      showToast("Couldn't copy — your browser may be blocking clipboard access.", "error");
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      aria-label="Copy"
+      title="Copy"
+      className={cn(
+        "absolute right-2 rounded p-1 text-muted-foreground hover:text-foreground",
+        align === "center" ? "top-1/2 -translate-y-1/2" : "top-2"
+      )}
+    >
+      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+    </button>
   );
 }
 
