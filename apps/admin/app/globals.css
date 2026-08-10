@@ -13,6 +13,9 @@
     --card: 40 33% 97%;
     --card-foreground: 20 24% 10%;
 
+    --popover: 40 33% 97%;            /* alias of --card — popovers read as the same elevated surface */
+    --popover-foreground: 20 24% 10%; /* alias of --card-foreground */
+
     --primary: 20 24% 10%;            /* ink, for primary buttons/nav */
     --primary-foreground: 40 33% 96%;
 

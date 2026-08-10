@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, Pencil, Trash2 } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { cn } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useToast } from "@/components/toast";
+import { DatePicker } from "@/components/date-picker";
 
 interface BrandOption {
   id: string;
@@ -140,23 +141,35 @@ function SaleRowItem({
 
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="truncate text-sm font-medium">{sale.name}</span>
-          <span
-            className={cn(
-              "rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide",
-              STATUS_STYLES[status]
-            )}
-          >
-            {status}
-          </span>
+      {/* The discount is the one fact that matters most about a sale, so it
+          gets its own bold, accent-tinted chip instead of sitting buried in
+          the muted metadata line with everything else at equal weight. */}
+      <div className="flex min-w-0 items-center gap-3">
+        <span
+          className={cn(
+            "shrink-0 rounded-md px-2 py-1 text-center text-base font-bold tabular",
+            status === "ended" ? "bg-secondary text-muted-foreground" : "bg-accent/15 text-accent"
+          )}
+        >
+          -{sale.discount_percent}%
+        </span>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="truncate text-sm font-medium">{sale.name}</span>
+            <span
+              className={cn(
+                "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide",
+                STATUS_STYLES[status]
+              )}
+            >
+              {status}
+            </span>
+          </div>
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+            {brandName} · <span className="tabular">{sale.starts_at}</span> –{" "}
+            <span className="tabular">{sale.ends_at}</span>
+          </p>
         </div>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          {brandName} · <span className="tabular">{sale.discount_percent}%</span> off ·{" "}
-          <span className="tabular">{sale.starts_at}</span> –{" "}
-          <span className="tabular">{sale.ends_at}</span>
-        </p>
       </div>
       <div className="flex shrink-0 items-center gap-1">
         <button
@@ -263,36 +276,34 @@ function SaleForm({
         </div>
         <div className="space-y-1">
           <label className="block text-xs text-muted-foreground">Brand</label>
-          <select
-            value={brandId}
-            onChange={(e) => setBrandId(e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="">All brands</option>
-            {brands.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
+              className="w-full appearance-none rounded-md border border-input bg-background pl-3 pr-8 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">All brands</option>
+              {brands.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
             <label className="block text-xs text-muted-foreground">Starts</label>
-            <input
-              type="date"
-              value={startsAt}
-              onChange={(e) => setStartsAt(e.target.value)}
-              className="w-full rounded-md border border-input bg-background px-2 py-2 text-sm tabular outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
+            <DatePicker value={startsAt} onChange={setStartsAt} placeholder="Start date" />
           </div>
           <div className="space-y-1">
             <label className="block text-xs text-muted-foreground">Ends</label>
-            <input
-              type="date"
+            <DatePicker
               value={endsAt}
-              onChange={(e) => setEndsAt(e.target.value)}
-              className="w-full rounded-md border border-input bg-background px-2 py-2 text-sm tabular outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onChange={setEndsAt}
+              placeholder="End date"
+              disabledBefore={startsAt || undefined}
             />
           </div>
         </div>
