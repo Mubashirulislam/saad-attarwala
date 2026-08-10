@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -34,16 +34,42 @@ export function Sidebar({ staffName }: { staffName: string }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  // Separate from mobileOpen on purpose — this controls whether the
+  // click-blocking backdrop is mounted at all, and stays true for a beat
+  // after mobileOpen goes false so it keeps blocking clicks while the
+  // drawer is still sliding out. Without this, the backdrop vanishes the
+  // instant you tap "close" while the drawer still has ~200ms left to
+  // animate away, so a quick second tap goes straight through to whatever
+  // page content it was covering.
+  const [backdropMounted, setBackdropMounted] = useState(false);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (localStorage.getItem(STORAGE_KEY) === "1") setCollapsed(true);
   }, []);
 
+  function openMobile() {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    setBackdropMounted(true);
+    setMobileOpen(true);
+  }
+
+  function closeMobile() {
+    setMobileOpen(false);
+    closeTimeoutRef.current = setTimeout(() => setBackdropMounted(false), 200);
+  }
+
   // Close the mobile drawer on every navigation instead of leaving it open
   // over the new page.
   useEffect(() => {
-    setMobileOpen(false);
+    closeMobile();
   }, [pathname]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    };
+  }, []);
 
   function toggleCollapsed() {
     setCollapsed((prev) => {
@@ -60,7 +86,7 @@ export function Sidebar({ staffName }: { staffName: string }) {
           no screen real estate to spare for a permanent sidebar on a phone. */}
       <div className="flex items-center justify-between border-b border-parchment/10 bg-ink px-4 py-3 text-parchment md:hidden">
         <button
-          onClick={() => setMobileOpen(true)}
+          onClick={openMobile}
           aria-label="Open menu"
           className="rounded-md p-1.5 hover:bg-parchment/10"
         >
@@ -70,11 +96,14 @@ export function Sidebar({ staffName }: { staffName: string }) {
         <span className="w-8" aria-hidden />
       </div>
 
-      {mobileOpen && (
+      {backdropMounted && (
         <div
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobile}
           aria-hidden
-          className="fixed inset-0 z-40 bg-ink/60 md:hidden"
+          className={cn(
+            "fixed inset-0 z-40 bg-ink/60 transition-opacity duration-200 md:hidden",
+            mobileOpen ? "opacity-100" : "opacity-0"
+          )}
         />
       )}
 
@@ -87,7 +116,7 @@ export function Sidebar({ staffName }: { staffName: string }) {
         <div className="flex items-center justify-between border-b border-parchment/10 px-4 py-5">
           <span className="text-sm font-semibold tracking-tight">Saad Attarwala</span>
           <button
-            onClick={() => setMobileOpen(false)}
+            onClick={closeMobile}
             aria-label="Close menu"
             className="rounded-md p-1.5 hover:bg-parchment/10"
           >
@@ -124,17 +153,17 @@ export function Sidebar({ staffName }: { staffName: string }) {
           collapsed ? "w-16" : "w-56"
         )}
       >
-        <div className="flex items-center justify-between border-b border-parchment/10 px-4 py-5">
-          {!collapsed && (
-            <span className="text-sm font-semibold tracking-tight">Saad Attarwala</span>
-          )}
+        {/* Button comes first and stays left-anchored regardless of collapsed
+            state, so its on-screen position never shifts during the width
+            transition. It used to sit at the far right via justify-between,
+            which meant it visually slid left as the sidebar shrank — click
+            mid-transition and the button (and the click) could land on
+            whatever was newly exposed underneath instead. */}
+        <div className="flex items-center gap-2 border-b border-parchment/10 px-4 py-5">
           <button
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className={cn(
-              "shrink-0 rounded-md p-1.5 transition-colors hover:bg-parchment/10",
-              collapsed && "mx-auto"
-            )}
+            className="shrink-0 rounded-md p-1.5 transition-colors hover:bg-parchment/10"
           >
             {collapsed ? (
               <ChevronsRight className="h-4 w-4" />
@@ -142,6 +171,9 @@ export function Sidebar({ staffName }: { staffName: string }) {
               <ChevronsLeft className="h-4 w-4" />
             )}
           </button>
+          {!collapsed && (
+            <span className="text-sm font-semibold tracking-tight">Saad Attarwala</span>
+          )}
         </div>
 
         <nav className="flex-1 space-y-1 px-2 py-3 text-sm">
