@@ -38,9 +38,26 @@ export interface Variant {
   created_at: string;
 }
 
+// A named, dated percentage discount — e.g. "Independence Day Sale, 15% off
+// Surrati, Aug 13-15". brand_id null means it applies across every brand
+// instead of just one. starts_at/ends_at are whole calendar days (IST),
+// not exact times.
+export interface Sale {
+  id: string;
+  name: string;
+  discount_percent: number;
+  brand_id: string | null;
+  starts_at: string;
+  ends_at: string;
+  created_at: string;
+}
+
 // Denormalized shape the public catalog actually renders — one row per
 // fragrance, with brand info flattened in and variants collected into
-// an array so the table can pivot sizes into columns client-side.
+// an array so the table can pivot sizes into columns client-side. Each
+// variant also carries its already-computed sale price (if any currently
+// active sale applies), so nothing on the display side needs to know about
+// sale date ranges at all.
 export interface CatalogFragrance {
   fragrance_id: string;
   fragrance_name: string;
@@ -48,7 +65,11 @@ export interface CatalogFragrance {
   brand_name: string;
   brand_slug: string;
   brand_logo_url: string | null;
-  variants: Pick<Variant, "size_ml" | "price_inr" | "in_stock">[];
+  variants: (Pick<Variant, "size_ml" | "price_inr" | "in_stock"> & {
+    sale_price_inr: number | null;
+    sale_name: string | null;
+    sale_discount_percent: number | null;
+  })[];
 }
 
 export interface Staff {

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BadgePercent,
   ChevronsLeft,
   ChevronsRight,
   ClipboardList,
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { href: "/orders", label: "Orders", icon: ClipboardList },
   { href: "/orders/new", label: "New order", icon: PlusCircle },
   { href: "/catalog", label: "Catalog", icon: Layers },
+  { href: "/sales", label: "Sales", icon: BadgePercent },
 ];
 
 // Two independent renderings rather than one component juggling both:

@@ -7,6 +7,7 @@ Monorepo scaffold for two apps sharing one Supabase project:
 - **packages/database** — shared Supabase types + query helpers used by both apps
 - **supabase/migrations/0001_init.sql** — full schema, RLS policies, order-number sequence, auto-recalculating order totals
 - **supabase/migrations/0002_brand_logo_storage.sql** — public Storage bucket for brand logos, staff-only writes
+- **supabase/migrations/0003_sales.sql** — time-boxed percentage discounts, per-brand or catalog-wide
 
 Two separate Next.js apps (not one app with route groups) on purpose: the
 admin app should never ship a single line of customer-order code to the
@@ -34,9 +35,9 @@ restrained one rather than leaving it undesigned:
 
 ## Setup
 
-1. Create a Supabase project, then run `supabase/migrations/0001_init.sql`
-   and `supabase/migrations/0002_brand_logo_storage.sql`, in that order, in
-   the SQL editor (or via `supabase db push` once the CLI is linked).
+1. Create a Supabase project, then run every file in `supabase/migrations/`
+   in order (0001, 0002, 0003) in the SQL editor (or via `supabase db push`
+   once the CLI is linked).
 2. Create Saad's own `auth.users` account (Supabase dashboard → Authentication),
    then insert a matching row into `staff` with `role = 'owner'`.
 3. Copy `.env.example` → `.env.local` in both `apps/web` and `apps/admin`,
@@ -55,8 +56,6 @@ restrained one rather than leaving it undesigned:
   are written for clarity over efficiency (multiple round trips). Fine for
   Saad's catalog size, but worth collapsing into one nested query or a
   Postgres view once the shape is confirmed.
-- **`app/api/revalidate/route.ts` has no auth check yet** — see the TODO
-  inline; add the `REVALIDATE_SECRET` header check before deploying.
 - **Trigram search** — the migration creates a `pg_trgm` index on
   `fragrances.name` but `searchFragrances` still uses a plain `ilike`.
   Swap to `similarity()` ordering once there's enough real data to tell

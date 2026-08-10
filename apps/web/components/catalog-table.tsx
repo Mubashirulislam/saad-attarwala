@@ -13,11 +13,12 @@ const rupee = (n: number) =>
 
 // Smallest-size price, used as the comparable "starting from" figure for
 // price sorting — sizes aren't standard across brands, so this is the
-// fairest single number to sort on.
+// fairest single number to sort on. Uses the sale price when one applies,
+// so "low to high" reflects what a customer would actually pay.
 function startingPrice(f: CatalogFragrance) {
   const inStock = f.variants.filter((v) => v.in_stock);
   if (inStock.length === 0) return Infinity;
-  return Math.min(...inStock.map((v) => v.price_inr));
+  return Math.min(...inStock.map((v) => v.sale_price_inr ?? v.price_inr));
 }
 
 // Every size that exists has been marked out of stock — distinct from a
@@ -25,6 +26,14 @@ function startingPrice(f: CatalogFragrance) {
 // rather than sold out.
 function isOutOfStock(f: CatalogFragrance) {
   return f.variants.length > 0 && f.variants.every((v) => !v.in_stock);
+}
+
+// A sale applies uniformly to every variant under a brand, so any variant
+// carrying one tells us the sale for the whole fragrance.
+function activeSale(f: CatalogFragrance) {
+  const v = f.variants.find((v) => v.sale_name != null);
+  if (!v) return null;
+  return { name: v.sale_name!, percent: v.sale_discount_percent! };
 }
 
 export function CatalogTable({ catalog }: { catalog: CatalogFragrance[] }) {
@@ -271,6 +280,7 @@ export function FragranceTable({
           <tbody>
             {fragrances.map((f, i) => {
               const outOfStock = isOutOfStock(f);
+              const sale = activeSale(f);
               return (
                 <tr
                   key={f.fragrance_id}
@@ -283,15 +293,41 @@ export function FragranceTable({
                         Out of stock
                       </span>
                     )}
+                    {sale && !outOfStock && (
+                      <span
+                        title={sale.name}
+                        className="ml-2 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent"
+                      >
+                        -{sale.percent}%
+                      </span>
+                    )}
                   </td>
                   {showBrandColumn && (
                     <td className="px-4 py-2 text-muted-foreground">{f.brand_name}</td>
                   )}
                   {sizeColumns.map((size) => {
                     const variant = f.variants.find((v) => v.size_ml === size);
+                    if (!variant || !variant.in_stock) {
+                      return (
+                        <td key={size} className="px-4 py-2 text-right tabular">
+                          —
+                        </td>
+                      );
+                    }
                     return (
                       <td key={size} className="px-4 py-2 text-right tabular">
-                        {variant && variant.in_stock ? `₹${rupee(variant.price_inr)}` : "—"}
+                        {variant.sale_price_inr != null ? (
+                          <span className="inline-flex flex-col items-end leading-tight">
+                            <span className="text-[10px] text-muted-foreground line-through">
+                              ₹{rupee(variant.price_inr)}
+                            </span>
+                            <span className="font-medium text-accent">
+                              ₹{rupee(variant.sale_price_inr)}
+                            </span>
+                          </span>
+                        ) : (
+                          `₹${rupee(variant.price_inr)}`
+                        )}
                       </td>
                     );
                   })}
@@ -306,6 +342,7 @@ export function FragranceTable({
       <div className="md:hidden space-y-2">
         {fragrances.map((f) => {
           const outOfStock = isOutOfStock(f);
+          const sale = activeSale(f);
           return (
             <div
               key={f.fragrance_id}
@@ -315,7 +352,17 @@ export function FragranceTable({
               )}
             >
               <div className="flex items-baseline justify-between">
-                <span className="font-medium">{f.fragrance_name}</span>
+                <span className="font-medium">
+                  {f.fragrance_name}
+                  {sale && !outOfStock && (
+                    <span
+                      title={sale.name}
+                      className="ml-2 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent"
+                    >
+                      -{sale.percent}%
+                    </span>
+                  )}
+                </span>
                 {showBrandColumn && (
                   <span className="text-xs text-muted-foreground">{f.brand_name}</span>
                 )}
@@ -333,7 +380,19 @@ export function FragranceTable({
                         key={v.size_ml}
                         className="rounded-md bg-secondary px-2 py-1 text-xs tabular"
                       >
-                        {v.size_ml}ml — ₹{rupee(v.price_inr)}
+                        {v.size_ml}ml —{" "}
+                        {v.sale_price_inr != null ? (
+                          <>
+                            <span className="text-muted-foreground line-through">
+                              ₹{rupee(v.price_inr)}
+                            </span>{" "}
+                            <span className="font-medium text-accent">
+                              ₹{rupee(v.sale_price_inr)}
+                            </span>
+                          </>
+                        ) : (
+                          `₹${rupee(v.price_inr)}`
+                        )}
                       </span>
                     ))}
                 </div>
