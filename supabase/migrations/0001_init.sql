@@ -1,4 +1,4 @@
--- Saad Attarwala — initial schema
+-- Pakeeza Perfumes — initial schema
 -- Run via: supabase db push  (or paste into the Supabase SQL editor)
 
 create extension if not exists "pgcrypto";
@@ -45,7 +45,7 @@ create table variants (
 );
 
 -- ---------------------------------------------------------------------------
--- STAFF  (extends Supabase auth.users — Saad + future helpers)
+-- STAFF  (extends Supabase auth.users — Saeed + future helpers)
 -- ---------------------------------------------------------------------------
 create table staff (
   id          uuid primary key references auth.users(id) on delete cascade,
@@ -80,7 +80,7 @@ create table orders (
 
 -- ---------------------------------------------------------------------------
 -- ORDER ITEMS  (snapshotted at time of order — price changes later must
--- never rewrite history / the screenshot Saad already sent the customer)
+-- never rewrite history / the screenshot Saeed already sent the customer)
 -- ---------------------------------------------------------------------------
 create table order_items (
   id                          uuid primary key default gen_random_uuid(),

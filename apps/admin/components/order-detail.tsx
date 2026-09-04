@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Copy } from "lucide-react";
-import type { Order, OrderItem } from "@saad/database";
+import type { Order, OrderItem } from "@pakeeza/database";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { StatusBadge } from "@/components/status-badge";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -67,11 +67,11 @@ export function OrderDetail({ order: initialOrder, items }: { order: Order; item
         </p>
       </div>
 
-      {/* Screenshot-ready summary — this is what Saad sends the customer,
+      {/* Screenshot-ready summary — this is what Saeed sends the customer,
           so it stays free of admin-only controls. */}
       <div className="rounded-lg border border-border bg-card p-6 pb-4">
         <div className="flex items-center justify-between">
-          <span className="font-semibold">Saad Attarwala</span>
+          <span className="font-semibold">Pakeeza Perfumes</span>
           <span className="tabular text-sm text-muted-foreground">{order.order_number}</span>
         </div>
 
@@ -150,11 +150,11 @@ export function OrderDetail({ order: initialOrder, items }: { order: Order; item
 }
 
 // *bold* is WhatsApp's own markdown, not decoration — this is meant to be
-// pasted straight into a chat, so it renders bold there without Saad having
+// pasted straight into a chat, so it renders bold there without Saeed having
 // to add formatting by hand.
 function buildOrderSummaryText(order: Order, items: OrderItem[]) {
   const lines = [
-    `*Saad Attarwala* — Order ${order.order_number}`,
+    `*Pakeeza Perfumes* — Order ${order.order_number}`,
     "",
     ...items.map(
       (item) =>

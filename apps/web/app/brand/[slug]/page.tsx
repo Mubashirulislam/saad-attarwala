@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createPublicSupabaseClient, getCatalog } from "@saad/database";
+import { createPublicSupabaseClient, getCatalog } from "@pakeeza/database";
 import { FragranceTable } from "@/components/catalog-table";
 
 export const revalidate = 60;

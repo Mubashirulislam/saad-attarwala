@@ -11,7 +11,7 @@ function todayIST(): string {
 }
 
 /**
- * Public catalog read — powers saadswebsite.in.
+ * Public catalog read — powers pakeeza-perfume-web.vercel.app.
  * Returns every fragrance with its brand info and full variant ladder,
  * so the client can group by brand and pivot sizes into columns. Each
  * variant's sale price (if any currently-active sale applies) is computed

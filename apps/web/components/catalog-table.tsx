@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import type { CatalogFragrance } from "@saad/database";
+import type { CatalogFragrance } from "@pakeeza/database";
 import { ArrowUp, ChevronDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 

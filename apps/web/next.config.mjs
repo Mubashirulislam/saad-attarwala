@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@saad/database"],
+  transpilePackages: ["@pakeeza/database"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.supabase.co" },

@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Every route in this app is staff-only except /login. There is no public
-// area here at all — that's what saadswebsite.in is for. This runs on
+// area here at all — that's what pakeeza-perfume-web.vercel.app is for. This runs on
 // every request, refreshes the session cookie, and bounces anyone without
 // a valid session to /login before they reach a page or Server Component.
 export async function middleware(request: NextRequest) {

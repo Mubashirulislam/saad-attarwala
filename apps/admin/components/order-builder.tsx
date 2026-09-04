@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
-import { searchFragrances, type FragranceSearchResult } from "@saad/database";
+import { searchFragrances, type FragranceSearchResult } from "@pakeeza/database";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { useToast } from "@/components/toast";
 

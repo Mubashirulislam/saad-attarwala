@@ -92,7 +92,7 @@ export function Sidebar({ staffName }: { staffName: string }) {
         >
           <Menu className="h-5 w-5" />
         </button>
-        <span className="text-sm font-semibold tracking-tight">Saad Attarwala</span>
+        <span className="text-sm font-semibold tracking-tight">Pakeeza Perfumes</span>
         <span className="w-8" aria-hidden />
       </div>
 
@@ -114,7 +114,7 @@ export function Sidebar({ staffName }: { staffName: string }) {
         )}
       >
         <div className="flex items-center justify-between border-b border-parchment/10 px-4 py-5">
-          <span className="text-sm font-semibold tracking-tight">Saad Attarwala</span>
+          <span className="text-sm font-semibold tracking-tight">Pakeeza Perfumes</span>
           <button
             onClick={closeMobile}
             aria-label="Close menu"
@@ -172,7 +172,7 @@ export function Sidebar({ staffName }: { staffName: string }) {
             )}
           </button>
           {!collapsed && (
-            <span className="text-sm font-semibold tracking-tight">Saad Attarwala</span>
+            <span className="text-sm font-semibold tracking-tight">Pakeeza Perfumes</span>
           )}
         </div>
 

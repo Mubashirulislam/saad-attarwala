@@ -5,8 +5,8 @@ import { ToastProvider } from "@/components/toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Saad Attarwala — Admin",
-  description: "Internal catalog and order management for Saad Attarwala.",
+  title: "Pakeeza Perfumes — Admin",
+  description: "Internal catalog and order management for Pakeeza Perfumes.",
   robots: { index: false, follow: false },
 };
 

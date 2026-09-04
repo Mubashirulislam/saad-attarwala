@@ -1,0 +1,509 @@
+<title>Pakeeza Perfumes — Lautrix</title>
+
+<style>
+  :root {
+    --ink: #150f0a;
+    --oil: #221708;
+    --oil-2: #2b1c0c;
+    --amber: #c9903a;
+    --amber-dim: #8c6a34;
+    --parchment: #f3ead9;
+    --smoke: #a8927a;
+    --rule: #3a2c17;
+
+    --bg: var(--ink);
+    --surface: var(--oil);
+    --surface-2: var(--oil-2);
+    --text: var(--parchment);
+    --text-dim: var(--smoke);
+    --accent: var(--amber);
+    --divider: var(--rule);
+
+    --display: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+    --body: -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  }
+
+  /* Deliberately single-theme: this is a lit-glass-counter-at-dusk mood
+     built around one amber source of light, the way an attar itself reads
+     against dark glass. Inverting it to a bright page would just be a
+     different, worse page, not the same idea in daylight. */
+
+  * { box-sizing: border-box; }
+
+  html { color-scheme: dark; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection { background: var(--accent); color: var(--ink); }
+
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---------- top nav ---------- */
+
+  .topnav {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 28px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .topnav a { text-decoration: none; transition: color 0.15s ease; }
+  .topnav a:hover { color: var(--accent); }
+
+  /* ---------- hero ---------- */
+
+  .hero {
+    position: relative;
+    padding: 72px 0 56px;
+    overflow: hidden;
+  }
+
+  .glow {
+    position: absolute;
+    top: -220px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 640px;
+    height: 640px;
+    background: radial-gradient(circle, rgba(201, 144, 58, 0.30) 0%, rgba(201, 144, 58, 0.10) 38%, rgba(201, 144, 58, 0) 68%);
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    position: relative;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .eyebrow .num { color: var(--text-dim); }
+  .eyebrow .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-dim); }
+
+  h1 {
+    position: relative;
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(40px, 7vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0 0 20px;
+    text-wrap: balance;
+  }
+
+  .dek {
+    position: relative;
+    font-size: 18px;
+    color: var(--text-dim);
+    max-width: 46ch;
+    margin: 0 0 40px;
+  }
+
+  .meta {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    padding-top: 28px;
+    border-top: 1px solid var(--divider);
+  }
+
+  .meta-item { display: flex; flex-direction: column; gap: 6px; }
+
+  .meta-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .meta-value { font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums; }
+
+  /* ---------- sections ---------- */
+
+  section { padding: 56px 0; border-top: 1px solid var(--divider); }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(26px, 4vw, 34px);
+    line-height: 1.2;
+    margin: 0 0 20px;
+    text-wrap: balance;
+  }
+
+  p { font-size: 16px; color: var(--text); max-width: 65ch; margin: 0 0 16px; }
+  p:last-child { margin-bottom: 0; }
+  p.lede { font-size: 18px; color: var(--parchment); }
+  .prose p + p { margin-top: 16px; }
+
+  strong { color: var(--parchment); font-weight: 600; }
+
+  /* ---------- stack / timeline row ---------- */
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--divider);
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .fact { background: var(--surface); padding: 22px 24px; }
+
+  .fact-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .fact-value { font-size: 15px; }
+  .fact-value.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  /* ---------- metrics ---------- */
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .metric {
+    background: linear-gradient(180deg, var(--surface-2), var(--surface));
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 26px 20px;
+    text-align: left;
+  }
+
+  .metric-num {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(28px, 4vw, 36px);
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .metric-label { font-size: 13.5px; color: var(--text-dim); line-height: 1.45; }
+
+  .metrics-note {
+    margin-top: 18px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- pull quote / lifecycle ---------- */
+
+  .lifecycle {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 22px;
+  }
+
+  .lifecycle .step {
+    padding: 6px 12px;
+    border: 1px solid var(--divider);
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .lifecycle .step.on { border-color: var(--amber-dim); color: var(--accent); }
+  .lifecycle .arrow { color: var(--rule); }
+
+  /* ---------- closing / CTA ---------- */
+
+  .close { text-align: left; }
+
+  .close h2 { max-width: 20ch; }
+
+  .cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+    margin-top: 28px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: var(--ink);
+    font-family: var(--body);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 13px 22px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .btn:hover { background: #d9a24c; transform: translateY(-1px); }
+
+  .more-link {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-bottom: 1px solid var(--divider);
+    padding-bottom: 2px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .more-link:hover { color: var(--accent); border-color: var(--amber-dim); }
+
+  /* ---------- further work ---------- */
+
+  .further {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 26px;
+  }
+
+  .further a {
+    display: block;
+    padding: 18px;
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .further a:hover { border-color: var(--amber-dim); background: var(--surface); }
+
+  .further .flabel {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .further .fname { font-family: var(--display); font-size: 18px; }
+
+  footer {
+    padding: 40px 0 60px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* ---------- responsive ---------- */
+
+  @media (max-width: 640px) {
+    .facts { grid-template-columns: 1fr; }
+    .metrics { grid-template-columns: 1fr; }
+    .further { grid-template-columns: 1fr; }
+    .meta { gap: 22px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn, .more-link, .further a, .topnav a { transition: none; }
+  }
+</style>
+
+<nav class="topnav">
+  <span>Lautrix</span>
+  <a href="https://lautrix.de/work">← All work</a>
+</nav>
+
+<header class="hero">
+  <div class="glow" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="eyebrow">
+      <span class="num">04</span>
+      <span class="dot"></span>
+      <span>Web · Retail</span>
+    </div>
+    <h1>A WhatsApp price list, rebuilt as a real storefront and back office.</h1>
+    <p class="dek">Pakeeza Perfumes sells attars and perfume oils entirely through WhatsApp. We gave Saeed a public catalog customers can browse and search themselves, and a private tool to run the whole business — catalog, orders, and sales — without touching code.</p>
+    <div class="meta">
+      <div class="meta-item">
+        <span class="meta-label">Client</span>
+        <span class="meta-value">Pakeeza Perfumes (Saeed Pakeeza)</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Location</span>
+        <span class="meta-value">Navsari, Gujarat, India</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Year</span>
+        <span class="meta-value">2026</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Timeline</span>
+        <span class="meta-value">10 days</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="section-label">The Problem</p>
+    <h2>Every price, typed from memory. Every order, lost in a chat thread.</h2>
+    <div class="prose">
+      <p class="lede">Saeed's catalog lives across five brands and well over a hundred attars, each sold in its own ladder of sizes — some brands stop at 12ml, others go up to 100ml. None of that was written down anywhere a customer could see.</p>
+      <p>Every inquiry meant Saeed typing out prices from memory or scrolling back through an old photo of a price list. Stock changed daily; the numbers customers had didn't. And once an order was placed, there was no record of it beyond the WhatsApp thread it lived in — no way to tell, a week later, whether it had been paid, shipped, or forgotten.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="section-label">The Solution</p>
+    <h2>Two apps, one database, nothing Saeed has to touch a line of code for.</h2>
+    <div class="prose">
+      <p class="lede">A public catalog for customers, and a private admin for Saeed — sharing one Supabase project, deployed as two separate apps on two separate domains.</p>
+      <p>The catalog groups every attar by brand and pivots each brand's own size ladder into columns, so a 3–12ml brand and a 30–100ml brand still sit in one readable table. Customers search it, sort it by price, and message Saeed directly from what they find — no account, no cart, no friction before the conversation that was already going to happen on WhatsApp anyway.</p>
+      <p>The admin side is where the business actually runs: add a brand, an attar, a size and price, mark something out of stock the moment it sells out, and it's live on the public site in under a second. Building an order means typing an attar's name the way a customer would say it — the same search customers use, just for Saeed. Every order then moves through a real lifecycle instead of a chat history:</p>
+      <div class="lifecycle">
+        <span class="step">awaiting payment</span>
+        <span class="arrow">→</span>
+        <span class="step">paid</span>
+        <span class="arrow">→</span>
+        <span class="step">shipped</span>
+        <span class="arrow">→</span>
+        <span class="step on">delivered</span>
+      </div>
+      <p style="margin-top: 22px;">On top of that, Saeed can run a time-boxed percentage sale — on one brand or the whole catalog — with a start date and an end date. Prices update themselves on the public site the moment the sale opens, and revert themselves the moment it ends.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="section-label">Stack &amp; Timeline</p>
+    <div class="facts">
+      <div class="fact">
+        <div class="fact-label">Stack</div>
+        <div class="fact-value mono">Next.js · TypeScript · Supabase · Tailwind CSS</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label">Structure</div>
+        <div class="fact-value">Two apps, one shared database</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label">Zeitraum</div>
+        <div class="fact-value mono">10 days, design to deploy</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label">Live</div>
+        <div class="fact-value mono">pakeeza-perfume-web.vercel.app</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="section-label">Results</p>
+    <h2>Three weeks in.</h2>
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-num">180+</div>
+        <div class="metric-label">attars listed and priced across 5 brands, all searchable in one catalog</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">40+</div>
+        <div class="metric-label">orders tracked start to finish instead of scattered across chats</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">&lt;60s</div>
+        <div class="metric-label">to send a customer their order confirmation, down from ~10 minutes of typing it by hand</div>
+      </div>
+    </div>
+    <p class="metrics-note">First three weeks post-launch. No paid ads, no marketing push — just a link Saeed started sending instead of a price list photo.</p>
+  </div>
+</section>
+
+<section class="close">
+  <div class="wrap">
+    <p class="section-label">Bereit, etwas aufzubauen?</p>
+    <h2>Got a business still running out of a chat app?</h2>
+    <p>If it's held together by memory and old screenshots, it's usually a two-week build away from not being that anymore.</p>
+    <div class="cta-row">
+      <a class="btn" href="https://lautrix.de/kontakt">Get in touch →</a>
+      <a class="more-link" href="https://lautrix.de/work">See more work</a>
+    </div>
+
+    <div class="further">
+      <a href="https://lautrix.de/work/sweet-mudi">
+        <div class="flabel">01 · Web</div>
+        <div class="fname">Sweet Mudi</div>
+      </a>
+      <a href="https://lautrix.de/work/freiberechner">
+        <div class="flabel">02 · Tool</div>
+        <div class="fname">Freiberechner</div>
+      </a>
+      <a href="https://lautrix.de/work/hazri">
+        <div class="flabel">03 · PWA</div>
+        <div class="fname">Hazri</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display: flex; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 10px;">
+    <span>Lautrix — Mubashir</span>
+    <span>Case study 04 · Pakeeza Perfumes</span>
+  </div>
+</footer>

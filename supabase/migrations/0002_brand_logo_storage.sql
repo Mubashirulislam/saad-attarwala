@@ -1,4 +1,4 @@
--- Saad Attarwala — brand logo storage
+-- Pakeeza Perfumes — brand logo storage
 -- Run via: supabase db push  (or paste into the Supabase SQL editor), after 0001_init.sql
 
 -- Public bucket: the web app renders logos as plain <img src> from the

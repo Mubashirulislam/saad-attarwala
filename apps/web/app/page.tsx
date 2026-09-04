@@ -1,4 +1,4 @@
-import { createPublicSupabaseClient, getCatalog } from "@saad/database";
+import { createPublicSupabaseClient, getCatalog } from "@pakeeza/database";
 import { CatalogTable } from "@/components/catalog-table";
 
 // Revalidate on a short interval as a safety net. The admin app also calls
@@ -15,7 +15,7 @@ export default async function CatalogPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Price list</h1>
         <p className="text-muted-foreground mt-1">
-          Search or sort below, then message Saad on WhatsApp with what you'd
+          Search or sort below, then message Saeed on WhatsApp with what you'd
           like and how much — he'll confirm the total including delivery.
         </p>
       </div>

@@ -1,4 +1,4 @@
-import { createBrowserSupabaseClient } from "@saad/database";
+import { createBrowserSupabaseClient } from "@pakeeza/database";
 
 // Public catalog only ever needs the anon browser client — RLS on the
 // brands/fragrances/variants tables allows anon reads, everything else

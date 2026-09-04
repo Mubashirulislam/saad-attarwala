@@ -1,9 +1,9 @@
-# Saad Attarwala
+# Pakeeza Perfumes
 
 Monorepo scaffold for two apps sharing one Supabase project:
 
-- **apps/web** — the public price-list catalog → deploy to `saadswebsite.in`
-- **apps/admin** — Saad's internal order + catalog tool → deploy to `admin.saadswebsite.in`
+- **apps/web** — the public price-list catalog → deploy to `pakeeza-perfume-web.vercel.app`
+- **apps/admin** — Saeed's internal order + catalog tool → deploy to `pakeeza-perfume-admin.vercel.app`
 - **packages/database** — shared Supabase types + query helpers used by both apps
 - **supabase/migrations/0001_init.sql** — full schema, RLS policies, order-number sequence, auto-recalculating order totals
 - **supabase/migrations/0002_brand_logo_storage.sql** — public Storage bucket for brand logos, staff-only writes
@@ -16,7 +16,7 @@ security postures anyway.
 
 ## Brand direction
 
-"Saad Attarwala" has no existing brand, so this scaffold sets a deliberately
+"Pakeeza Perfumes" has no existing brand, so this scaffold sets a deliberately
 restrained one rather than leaving it undesigned:
 
 - **Type**: Geist Sans for everything UI, Geist Mono for every number —
@@ -31,14 +31,14 @@ restrained one rather than leaving it undesigned:
   - `glass` `#6B5744` — muted brown for secondary text
   - `sage` / `clay` — status colors for paid/success vs cancelled/error
 - No icon or logomark yet — just a wordmark. Avoids the generic-AI-logo trap
-  entirely; add one later if Saad wants it.
+  entirely; add one later if Saeed wants it.
 
 ## Setup
 
 1. Create a Supabase project, then run every file in `supabase/migrations/`
    in order (0001, 0002, 0003) in the SQL editor (or via `supabase db push`
    once the CLI is linked).
-2. Create Saad's own `auth.users` account (Supabase dashboard → Authentication),
+2. Create Saeed's own `auth.users` account (Supabase dashboard → Authentication),
    then insert a matching row into `staff` with `role = 'owner'`.
 3. Copy `.env.example` → `.env.local` in both `apps/web` and `apps/admin`,
    fill in the Supabase URL/anon key.
@@ -54,7 +54,7 @@ restrained one rather than leaving it undesigned:
   for generated shadcn components should be close to a 1:1 replace.
 - **`getCatalog` / `searchFragrances`** in `packages/database/src/queries.ts`
   are written for clarity over efficiency (multiple round trips). Fine for
-  Saad's catalog size, but worth collapsing into one nested query or a
+  Saeed's catalog size, but worth collapsing into one nested query or a
   Postgres view once the shape is confirmed.
 - **Trigram search** — the migration creates a `pg_trgm` index on
   `fragrances.name` but `searchFragrances` still uses a plain `ilike`.

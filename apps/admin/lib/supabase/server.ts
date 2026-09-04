@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { createServerSupabaseClient } from "@saad/database";
+import { createServerSupabaseClient } from "@pakeeza/database";
 
 // Server Component / Server Action client — reads the staff member's
 // session from cookies so RLS policies (`auth.uid() in (select id from staff)`)

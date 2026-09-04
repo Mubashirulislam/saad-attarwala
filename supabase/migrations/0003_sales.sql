@@ -1,4 +1,4 @@
--- Saad Attarwala — sales / time-boxed percentage discounts
+-- Pakeeza Perfumes — sales / time-boxed percentage discounts
 -- Run via: supabase db push  (or paste into the Supabase SQL editor),
 -- after 0001_init.sql and 0002_brand_logo_storage.sql
 

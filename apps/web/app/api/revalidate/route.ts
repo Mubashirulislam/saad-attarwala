@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 // Called by the admin app (server-side) right after a brand/fragrance/
-// variant is created or edited, so saadswebsite.in reflects the change on
+// variant is created or edited, so pakeeza-perfume-web.vercel.app reflects the change on
 // next load instead of waiting up to 60s for the ISR window in app/page.tsx.
 //
 // TODO(claude-code): protect this with a shared secret header

@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@saad/database": "workspace:*",
+    "@pakeeza/database": "workspace:*",
     "@supabase/supabase-js": "^2.45.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",

@@ -479,7 +479,7 @@ function FragranceRowEditor({
     onFragranceDeleted(fragrance.id);
   }
 
-  // One click, no form — this is the action Saad reaches for most, so it
+  // One click, no form — this is the action Saeed reaches for most, so it
   // shouldn't require opening the edit form just to flip a boolean. The web
   // catalog already hides out-of-stock sizes/shows "—" for them, so this is
   // the only step needed for it to show up there.
