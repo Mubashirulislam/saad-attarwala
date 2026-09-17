@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus, PackageCheck, PackageX, Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, ImagePlus, PackageCheck, PackageX, Pencil, Trash2 } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { slugify } from "@/lib/slug";
 import { cn } from "@/lib/utils";
@@ -213,11 +213,23 @@ function BrandCard({
   return (
     <div className="rounded-lg border border-border">
       <div className="flex items-center gap-3 px-4 py-3">
-        <BrandLogo brand={brand} />
-        <button onClick={onToggle} className="flex-1 flex items-center justify-between text-left">
-          <span className="font-medium text-sm">{brand.name}</span>
-          <span className="text-xs text-muted-foreground">
-            {fragrances.length} attar{fragrances.length === 1 ? "" : "s"}
+        <button
+          onClick={onToggle}
+          title={expanded ? "Collapse" : "Click to see attars under this brand"}
+          className="flex flex-1 items-center gap-3 text-left"
+        >
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+              expanded && "rotate-180"
+            )}
+          />
+          <BrandLogo brand={brand} />
+          <span className="flex-1 flex items-center justify-between gap-2">
+            <span className="font-medium text-sm">{brand.name}</span>
+            <span className="text-xs text-muted-foreground">
+              {fragrances.length} attar{fragrances.length === 1 ? "" : "s"}
+            </span>
           </span>
         </button>
         <button
@@ -343,6 +355,13 @@ function BrandDetailsEditForm({
   }
 
   return (
+    // Flex-wrap so this still stacks into multiple lines on a narrow phone
+    // screen, same as before — but every column here is now the same
+    // two-row shape (a fixed-height label/spacer, then the control), so
+    // whichever line a column lands on, its control sits at the same
+    // vertical offset as its neighbors. Previously Save/Cancel had no label
+    // above them, so their column was shorter than Photo/Name/Origin's and
+    // the row never lined up cleanly.
     <div className="flex flex-wrap items-end gap-2">
       <div className="space-y-1">
         <span className="block h-4 text-xs leading-4 text-muted-foreground">Photo</span>
@@ -365,19 +384,33 @@ function BrandDetailsEditForm({
           className="block h-9 w-40 rounded-md border border-input bg-card px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
-      <button
-        onClick={save}
-        disabled={saving}
-        className="h-9 rounded-md bg-primary text-primary-foreground px-3 text-sm font-medium disabled:opacity-50"
-      >
-        {saving ? "Saving…" : "Save"}
-      </button>
-      <button
-        onClick={onCancel}
-        className="h-9 px-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        Cancel
-      </button>
+      {/* Forces Save/Cancel onto their own line below the fields, but only
+          on mobile — a zero-height, full-width flex child breaks the wrap
+          right before it; hidden from sm: up so the buttons stay inline
+          with the fields on wider screens instead. */}
+      <div aria-hidden className="basis-full sm:hidden" />
+
+      <div className="flex items-end gap-2">
+        <div className="space-y-1">
+          <span aria-hidden className="block h-4" />
+          <button
+            onClick={save}
+            disabled={saving}
+            className="h-9 rounded-md bg-primary text-primary-foreground px-3 text-sm font-medium disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
+        </div>
+        <div className="space-y-1">
+          <span aria-hidden className="block h-4" />
+          <button
+            onClick={onCancel}
+            className="h-9 px-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

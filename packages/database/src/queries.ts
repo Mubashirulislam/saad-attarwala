@@ -1,5 +1,27 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { PostgrestResponse, SupabaseClient } from "@supabase/supabase-js";
 import type { CatalogFragrance, FragranceSearchResult } from "./types";
+
+const PAGE_SIZE = 1000;
+
+// Supabase's REST API caps any single response at 1000 rows (the project's
+// Max Rows setting) — a plain .select() silently returns a truncated result
+// once a table passes that size instead of erroring, so every unbounded
+// catalog read has to page through .range() instead. Do not "simplify" this
+// back to a single .select().
+async function fetchAllRows<T>(
+  page: (from: number, to: number) => PromiseLike<PostgrestResponse<T>>
+): Promise<T[]> {
+  const rows: T[] = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await page(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    rows.push(...(data ?? []));
+    if (!data || data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+  return rows;
+}
 
 // India-local calendar date (YYYY-MM-DD). Sale start/end dates are meant as
 // IST calendar days ("Independence Day" = Aug 15 IST) — comparing against a
@@ -23,20 +45,20 @@ function todayIST(): string {
  * view (e.g. `catalog_view`) for one round trip.
  */
 export async function getCatalog(supabase: SupabaseClient): Promise<CatalogFragrance[]> {
-  const { data: brands, error: brandsError } = await supabase
-    .from("brands")
-    .select("id, name, slug, logo_url");
-  if (brandsError) throw brandsError;
+  const brands = await fetchAllRows((from, to) =>
+    supabase.from("brands").select("id, name, slug, logo_url").range(from, to)
+  );
 
-  const { data: fragrances, error: fragrancesError } = await supabase
-    .from("fragrances")
-    .select("id, name, brand_id");
-  if (fragrancesError) throw fragrancesError;
+  const fragrances = await fetchAllRows((from, to) =>
+    supabase.from("fragrances").select("id, name, brand_id").range(from, to)
+  );
 
-  const { data: variants, error: variantsError } = await supabase
-    .from("variants")
-    .select("fragrance_id, size_ml, price_inr, in_stock");
-  if (variantsError) throw variantsError;
+  const variants = await fetchAllRows((from, to) =>
+    supabase
+      .from("variants")
+      .select("fragrance_id, size_ml, price_inr, in_stock")
+      .range(from, to)
+  );
 
   const today = todayIST();
   const { data: sales, error: salesError } = await supabase
