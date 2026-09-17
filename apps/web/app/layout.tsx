@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
-      <body>
+      <body className="min-h-screen flex flex-col">
         <header className="bg-ink text-parchment">
           <div className="mx-auto max-w-5xl px-4 py-5 flex items-center justify-between">
             <span className="text-lg font-semibold tracking-tight">Pakeeza Perfumes</span>
@@ -28,7 +28,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </span>
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
+        {/* flex-1 makes this the one element that stretches to fill leftover
+            height, so the footer below it lands at the bottom of the
+            viewport on a short page (e.g. a brand with only a few attars)
+            instead of floating right under the content with blank space
+            beneath it. On a page tall enough to scroll, this has no visible
+            effect — the footer just follows the content as normal. */}
+        <main className="mx-auto max-w-5xl px-4 py-6 flex-1 w-full">{children}</main>
         <footer className="mx-auto max-w-5xl px-4 py-10 text-sm text-muted-foreground">
           <p>
             Prices are updated directly by Saeed. To place an order, message

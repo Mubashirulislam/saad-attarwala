@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { CatalogFragrance } from "@pakeeza/database";
-import { ArrowUp, ChevronDown, Search } from "lucide-react";
+import { ArrowUp, ChevronDown, ChevronRight, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type SortMode = "brand" | "name" | "price-asc";
@@ -34,6 +34,43 @@ function activeSale(f: CatalogFragrance) {
   const v = f.variants.find((v) => v.sale_name != null);
   if (!v) return null;
   return { name: v.sale_name!, percent: v.sale_discount_percent! };
+}
+
+// Shared by the homepage's cross-brand search and the brand page's own
+// search — a plain text input plus an "x" button that only shows up once
+// there's something typed, so clearing a search doesn't mean manually
+// backspacing it out.
+function SearchInput({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <div className="relative">
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-md border border-input bg-card pl-9 pr-9 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          aria-label="Clear search"
+          title="Clear search"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  );
 }
 
 export function CatalogTable({ catalog }: { catalog: CatalogFragrance[] }) {
@@ -86,13 +123,11 @@ export function CatalogTable({ catalog }: { catalog: CatalogFragrance[] }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
+        <div className="flex-1">
+          <SearchInput
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={setQuery}
             placeholder="Search an attar or perfume…"
-            className="w-full rounded-md border border-input bg-card pl-9 pr-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
         <div className="relative">
@@ -116,22 +151,7 @@ export function CatalogTable({ catalog }: { catalog: CatalogFragrance[] }) {
       )}
 
       {showBrandGrid ? (
-        <>
-          {/* Quick-jump tiles — scroll straight to that brand's table below
-              instead of navigating away, so you never leave this page. */}
-          <BrandGrid groups={groupedByBrand} />
-          <div className="space-y-6">
-            {groupedByBrand.map(([brandName, fragrances]) => (
-              <BrandSection
-                key={brandName}
-                brandName={brandName}
-                slug={fragrances[0]?.brand_slug}
-                logoUrl={fragrances[0]?.brand_logo_url ?? null}
-                fragrances={fragrances}
-              />
-            ))}
-          </div>
-        </>
+        <BrandGrid groups={groupedByBrand} />
       ) : (
         flatSorted.length > 0 && (
           <FragranceTable fragrances={flatSorted} sizeColumns={sizeColumns} showBrandColumn />
@@ -173,8 +193,10 @@ function BackToTop() {
   );
 }
 
-// One tile per brand — click through to that brand's own price list instead
-// of scrolling past every brand's full table stacked on one page.
+// One tile per brand — click through to that brand's own dedicated price
+// list page (apps/web/app/brand/[slug]/page.tsx) instead of stacking every
+// brand's full table on this one page, which stops being readable once a
+// brand has 100+ attars.
 function BrandGrid({ groups }: { groups: [string, CatalogFragrance[]][] }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
@@ -184,16 +206,8 @@ function BrandGrid({ groups }: { groups: [string, CatalogFragrance[]][] }) {
         return (
           <Link
             key={brandName}
-            href={slug ? `#brand-${slug}` : "#"}
-            scroll={false}
-            onClick={(e) => {
-              if (!slug) return;
-              e.preventDefault();
-              document
-                .getElementById(`brand-${slug}`)
-                ?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }}
-            className="flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 text-center transition-colors hover:border-accent hover:bg-secondary/40"
+            href={slug ? `/brand/${slug}` : "#"}
+            className="group flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 text-center shadow-sm transition-all hover:border-accent hover:bg-secondary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -207,6 +221,14 @@ function BrandGrid({ groups }: { groups: [string, CatalogFragrance[]][] }) {
                 {fragrances.length} attar{fragrances.length === 1 ? "" : "s"}
               </div>
             </div>
+            {/* Always visible, not just on hover — a hover-only cue is
+                invisible on touch devices, which is most of this catalog's
+                traffic, so the "this leads somewhere" signal has to be
+                on-screen by default. */}
+            <div className="mt-1 flex items-center gap-1 text-xs font-medium text-accent">
+              View price list
+              <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </div>
           </Link>
         );
       })}
@@ -214,41 +236,42 @@ function BrandGrid({ groups }: { groups: [string, CatalogFragrance[]][] }) {
   );
 }
 
-function BrandSection({
-  brandName,
-  slug,
-  logoUrl,
+// Search scoped to one brand's own attar list — used on the brand detail
+// page (apps/web/app/brand/[slug]/page.tsx), which needs its own search
+// since a brand like Surrati can carry 100+ attars on its own.
+export function BrandFragranceSearch({
   fragrances,
+  sizeColumns,
 }: {
-  brandName: string;
-  slug?: string;
-  logoUrl: string | null;
   fragrances: CatalogFragrance[];
+  sizeColumns: number[];
 }) {
-  // Scoped to just this brand's own sizes, not the union across the whole
-  // catalog — a brand that only ever sells 12/6/3ml shouldn't show empty
-  // 100ml/50ml columns just because some other brand offers those sizes.
-  const sizeColumns = Array.from(
-    new Set(fragrances.flatMap((f) => f.variants.map((v) => v.size_ml)))
-  ).sort((a, b) => b - a);
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return fragrances;
+    return fragrances.filter((f) => f.fragrance_name.toLowerCase().includes(q));
+  }, [fragrances, query]);
 
   return (
-    <section id={slug ? `brand-${slug}` : undefined} className="scroll-mt-20">
-      {/* Sticky on every breakpoint — the header travels with you while
-          scrolling through that brand's list/table, then gets pushed off by
-          the next brand's own sticky header as soon as that section reaches
-          the top. */}
-      <div className="sticky top-0 z-10 -mx-4 mb-2 flex items-center gap-2 bg-background px-4 py-2">
-        {logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={logoUrl} alt="" className="h-6 w-6 rounded-sm object-contain" />
-        ) : (
-          <div className="h-6 w-6 rounded-sm bg-secondary" />
-        )}
-        <h2 className="font-medium">{brandName}</h2>
+    <div className="space-y-4">
+      <div className="max-w-sm">
+        <SearchInput
+          value={query}
+          onChange={setQuery}
+          placeholder="Search this brand's attars…"
+        />
       </div>
-      <FragranceTable fragrances={fragrances} sizeColumns={sizeColumns} />
-    </section>
+
+      {filtered.length === 0 ? (
+        <p className="text-muted-foreground py-12 text-center">
+          Nothing matches "{query}". Try a different spelling.
+        </p>
+      ) : (
+        <FragranceTable fragrances={filtered} sizeColumns={sizeColumns} />
+      )}
+    </div>
   );
 }
 

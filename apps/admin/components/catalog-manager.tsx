@@ -83,8 +83,24 @@ export function CatalogManager({
     notifyPublicSite();
   }
 
+  function handleBrandDeleted(brandId: string) {
+    const deletedFragranceIds = new Set(
+      fragrances.filter((f) => f.brand_id === brandId).map((f) => f.id)
+    );
+    setBrands((prev) => prev.filter((b) => b.id !== brandId));
+    setFragrances((prev) => prev.filter((f) => f.brand_id !== brandId));
+    setVariants((prev) => prev.filter((v) => !deletedFragranceIds.has(v.fragrance_id)));
+    setExpanded((prev) => (prev === brandId ? null : prev));
+    notifyPublicSite();
+  }
+
   function handleVariantUpdated(updated: VariantRow) {
     setVariants((prev) => prev.map((v) => (v.id === updated.id ? updated : v)));
+    notifyPublicSite();
+  }
+
+  function handleFragranceUpdated(updated: FragranceRow) {
+    setFragrances((prev) => prev.map((f) => (f.id === updated.id ? updated : f)));
     notifyPublicSite();
   }
 
@@ -125,6 +141,8 @@ export function CatalogManager({
             }}
             onVariantUpdated={handleVariantUpdated}
             onBrandUpdated={handleBrandUpdated}
+            onBrandDeleted={handleBrandDeleted}
+            onFragranceUpdated={handleFragranceUpdated}
           />
         ))}
       </div>
@@ -143,6 +161,8 @@ function BrandCard({
   onVariantAdded,
   onVariantUpdated,
   onBrandUpdated,
+  onBrandDeleted,
+  onFragranceUpdated,
 }: {
   brand: BrandRow;
   fragrances: FragranceRow[];
@@ -154,9 +174,13 @@ function BrandCard({
   onVariantAdded: (v: VariantRow) => void;
   onVariantUpdated: (v: VariantRow) => void;
   onBrandUpdated: (b: BrandRow) => void;
+  onBrandDeleted: (brandId: string) => void;
+  onFragranceUpdated: (f: FragranceRow) => void;
 }) {
   const [newFragranceName, setNewFragranceName] = useState("");
   const [editingDetails, setEditingDetails] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const showToast = useToast();
 
   async function addFragrance() {
@@ -170,6 +194,20 @@ function BrandCard({
     if (error) return showToast(error.message, "error");
     onFragranceAdded(data);
     setNewFragranceName("");
+  }
+
+  async function deleteBrand() {
+    setDeleting(true);
+    const { error } = await supabaseBrowser.from("brands").delete().eq("id", brand.id);
+    setDeleting(false);
+    setConfirmingDelete(false);
+    if (error) {
+      // Most likely cause: a variant under this brand is referenced by an
+      // existing order (order_items.variant_id has no cascade on purpose,
+      // see supabase/migrations/0001_init.sql), so the DB refuses the delete.
+      return showToast(error.message, "error");
+    }
+    onBrandDeleted(brand.id);
   }
 
   return (
@@ -193,7 +231,27 @@ function BrandCard({
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
+        <button
+          onClick={() => setConfirmingDelete(true)}
+          disabled={deleting}
+          aria-label={`Delete ${brand.name}`}
+          title="Delete this brand"
+          className="shrink-0 text-muted-foreground hover:text-destructive disabled:opacity-50"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title={`Delete "${brand.name}"?`}
+        description="This removes the brand and every attar and size under it. This can't be undone."
+        confirmLabel="Delete"
+        destructive
+        loading={deleting}
+        onConfirm={deleteBrand}
+        onCancel={() => setConfirmingDelete(false)}
+      />
 
       {editingDetails && (
         <div className="border-t border-border p-3">
@@ -219,6 +277,7 @@ function BrandCard({
               onVariantAdded={onVariantAdded}
               onVariantUpdated={onVariantUpdated}
               onFragranceDeleted={onFragranceDeleted}
+              onFragranceUpdated={onFragranceUpdated}
             />
           ))}
 
@@ -227,7 +286,7 @@ function BrandCard({
               value={newFragranceName}
               onChange={(e) => setNewFragranceName(e.target.value)}
               placeholder="New attar name, e.g. Ruh Khus No 1"
-              className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex-1 rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
             <button
               onClick={addFragrance}
@@ -294,7 +353,7 @@ function BrandDetailsEditForm({
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="block h-9 w-40 rounded-md border border-input bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="block h-9 w-40 rounded-md border border-input bg-card px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
       <div className="space-y-1">
@@ -303,7 +362,7 @@ function BrandDetailsEditForm({
           value={origin}
           onChange={(e) => setOrigin(e.target.value)}
           placeholder="e.g. Dubai, UAE"
-          className="block h-9 w-40 rounded-md border border-input bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="block h-9 w-40 rounded-md border border-input bg-card px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
       <button
@@ -436,19 +495,49 @@ function FragranceRowEditor({
   onVariantAdded,
   onVariantUpdated,
   onFragranceDeleted,
+  onFragranceUpdated,
 }: {
   fragrance: FragranceRow;
   variants: VariantRow[];
   onVariantAdded: (v: VariantRow) => void;
   onVariantUpdated: (v: VariantRow) => void;
   onFragranceDeleted: (fragranceId: string) => void;
+  onFragranceUpdated: (f: FragranceRow) => void;
 }) {
   const [size, setSize] = useState("");
   const [price, setPrice] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [editingVariantId, setEditingVariantId] = useState<string | null>(null);
+  const [nameDraft, setNameDraft] = useState(fragrance.name);
+  const [savingName, setSavingName] = useState(false);
   const showToast = useToast();
+
+  // Always-editable name field (no separate "edit mode") — saves on blur or
+  // Enter, reverts on Escape or an empty/unchanged value. Regenerates the
+  // slug from the new name, same as every other rename in this file, since
+  // nothing links to a fragrance by slug yet.
+  async function saveName() {
+    const trimmed = nameDraft.trim();
+    if (!trimmed || trimmed === fragrance.name) {
+      setNameDraft(fragrance.name);
+      return;
+    }
+    setSavingName(true);
+    const { data, error } = await supabaseBrowser
+      .from("fragrances")
+      .update({ name: trimmed, slug: slugify(trimmed) })
+      .eq("id", fragrance.id)
+      .select()
+      .single();
+    setSavingName(false);
+    if (error) {
+      showToast(error.message, "error");
+      setNameDraft(fragrance.name);
+      return;
+    }
+    onFragranceUpdated(data);
+  }
 
   async function addVariant() {
     const sizeMl = Number(size);
@@ -500,7 +589,21 @@ function FragranceRowEditor({
   return (
     <div className="rounded-md bg-secondary/40 p-3">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-medium">{fragrance.name}</span>
+        <input
+          value={nameDraft}
+          onChange={(e) => setNameDraft(e.target.value)}
+          onBlur={saveName}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.currentTarget.blur();
+            if (e.key === "Escape") {
+              setNameDraft(fragrance.name);
+              e.currentTarget.blur();
+            }
+          }}
+          disabled={savingName}
+          aria-label={`Attar name: ${fragrance.name}`}
+          className="min-w-0 rounded-md border border-transparent bg-transparent px-1 -mx-1 text-sm font-medium outline-none hover:border-border focus-visible:border-input focus-visible:bg-card focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+        />
         <div className="flex items-center gap-2">
           <div className="flex flex-wrap gap-1.5 justify-end">
             {sortedVariants.map((v) => (
@@ -576,13 +679,13 @@ function FragranceRowEditor({
           value={size}
           onChange={(e) => setSize(e.target.value)}
           placeholder="Size (ml)"
-          className="w-24 rounded-md border border-input bg-background px-2 py-1 text-xs tabular"
+          className="w-24 rounded-md border border-input bg-card px-2 py-1 text-xs tabular"
         />
         <input
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           placeholder="Price (₹)"
-          className="w-24 rounded-md border border-input bg-background px-2 py-1 text-xs tabular"
+          className="w-24 rounded-md border border-input bg-card px-2 py-1 text-xs tabular"
         />
         <button
           onClick={addVariant}
@@ -637,13 +740,13 @@ function VariantEditForm({
         value={size}
         onChange={(e) => setSize(e.target.value)}
         placeholder="Size (ml)"
-        className="w-24 rounded-md border border-input bg-background px-2 py-1 text-xs tabular"
+        className="w-24 rounded-md border border-input bg-card px-2 py-1 text-xs tabular"
       />
       <input
         value={price}
         onChange={(e) => setPrice(e.target.value)}
         placeholder="Price (₹)"
-        className="w-24 rounded-md border border-input bg-background px-2 py-1 text-xs tabular"
+        className="w-24 rounded-md border border-input bg-card px-2 py-1 text-xs tabular"
       />
       <button
         onClick={save}

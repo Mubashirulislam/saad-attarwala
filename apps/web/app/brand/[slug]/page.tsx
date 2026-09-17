@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createPublicSupabaseClient, getCatalog } from "@pakeeza/database";
-import { FragranceTable } from "@/components/catalog-table";
+import { BrandFragranceSearch } from "@/components/catalog-table";
 
 export const revalidate = 60;
 
@@ -37,7 +37,7 @@ export default async function BrandPage({ params }: { params: { slug: string } }
         <h1 className="text-2xl font-semibold tracking-tight">{brandName}</h1>
       </div>
 
-      <FragranceTable fragrances={fragrances} sizeColumns={sizeColumns} />
+      <BrandFragranceSearch fragrances={fragrances} sizeColumns={sizeColumns} />
     </div>
   );
 }
