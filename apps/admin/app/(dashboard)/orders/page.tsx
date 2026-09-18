@@ -222,7 +222,7 @@ export default async function OrdersPage({
           and the tabs, with the KPI cards reappearing on the next scroll
           up. A solid bg is required since this now sits on top of
           scrolling content instead of being part of the normal page flow. */}
-      <div className="sticky top-14 z-20 space-y-4 bg-background pb-2 md:static md:top-auto md:z-auto md:bg-transparent md:pb-0">
+      <div className="sticky top-14 z-20 space-y-4 bg-background pb-2 pt-3 md:static md:top-auto md:z-auto md:bg-transparent md:pb-0 md:pt-0">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold">Orders</h1>
           <Link
