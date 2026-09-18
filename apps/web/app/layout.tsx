@@ -11,7 +11,7 @@ const PHONE_DISPLAY = "+91 97141 88814";
 const EMAIL = "pakeezasaeed059@gmail.com";
 
 export const metadata: Metadata = {
-  title: "Pakeeza Perfumes — Attar & Perfume Price List",
+  title: "Pakeeza Perfumes — Attar & perfume price list",
   description:
     "Browse every attar and perfume Pakeeza Perfumes carries, grouped by brand, with prices for every available size.",
 };

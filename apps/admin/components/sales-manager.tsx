@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, Pencil, Trash2 } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { cn } from "@/lib/utils";
+import { cn, toSentenceCase } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useToast } from "@/components/toast";
 import { DatePicker } from "@/components/date-picker";
@@ -158,11 +158,11 @@ function SaleRowItem({
             <span className="truncate text-sm font-medium">{sale.name}</span>
             <span
               className={cn(
-                "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide",
+                "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide",
                 STATUS_STYLES[status]
               )}
             >
-              {status}
+              {toSentenceCase(status)}
             </span>
           </div>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">

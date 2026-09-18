@@ -83,8 +83,12 @@ export function Sidebar({ staffName }: { staffName: string }) {
     <>
       {/* Mobile top bar — the only permanently-visible chrome below md.
           The full nav lives in the off-canvas drawer instead, since there's
-          no screen real estate to spare for a permanent sidebar on a phone. */}
-      <div className="flex items-center justify-between border-b border-parchment/10 bg-ink px-4 py-3 text-parchment md:hidden">
+          no screen real estate to spare for a permanent sidebar on a phone.
+          Sticky with a fixed height (h-14) rather than the old py-3
+          auto-height, so pages below it (e.g. Orders) can pin their own
+          sticky content flush underneath at a known top-14 offset instead
+          of guessing this bar's rendered height. */}
+      <div className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-parchment/10 bg-ink px-4 text-parchment md:hidden">
         <button
           onClick={openMobile}
           aria-label="Open menu"
