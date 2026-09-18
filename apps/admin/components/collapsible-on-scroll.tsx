@@ -30,20 +30,39 @@ export function CollapsibleOnScroll({ children }: { children: React.ReactNode })
   const contentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const fullHeight = useRef(0);
+  // How far the page can scroll in total. Measured once per layout (mount
+  // + resize), *before* any collapsing has happened, since collapsing
+  // shrinks the page and would otherwise poison this measurement.
+  const maxScrollable = useRef(0);
   const ticking = useRef(false);
 
   useEffect(() => {
     function measure() {
-      if (contentRef.current) fullHeight.current = contentRef.current.scrollHeight;
+      const el = wrapperRef.current;
+      if (!el || !contentRef.current) return;
+      // Reset to natural size first — if a previous scroll already
+      // collapsed this element, document.scrollHeight below would reflect
+      // that shrunk state instead of the true full-page height.
+      el.style.opacity = "";
+      el.style.maxHeight = "";
+      fullHeight.current = contentRef.current.scrollHeight;
+      maxScrollable.current = document.documentElement.scrollHeight - window.innerHeight;
     }
 
     function apply() {
       ticking.current = false;
       const el = wrapperRef.current;
       if (!el) return;
-      if (window.innerWidth >= DESKTOP_BREAKPOINT) {
-        // Clear any inline override so the element falls back to its
-        // normal (always fully visible) desktop layout.
+      // Only collapse when there's genuinely more content below than just
+      // the KPI section's own height — with only a couple of order cards,
+      // the whole page barely exceeds one screen, and you can still
+      // scroll past the KPI cards' own height even though there's nothing
+      // left to reveal by hiding them. Collapsing there looks broken
+      // rather than helpful, so it's disabled entirely in that case.
+      if (
+        window.innerWidth >= DESKTOP_BREAKPOINT ||
+        maxScrollable.current <= fullHeight.current
+      ) {
         el.style.opacity = "";
         el.style.maxHeight = "";
         return;
