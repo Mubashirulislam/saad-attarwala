@@ -103,10 +103,27 @@ export default async function OrdersPage({
   // Every status's count, in one query — powers the tab bar below so each
   // tab shows how many orders are in it instead of making you click through
   // blind, and also feeds the summary cards above it. A handful of rows per
-  // query even at real volume, cheap either way.
-  const { data: allOrders } = await supabase
+  // query even at real volume, cheap either way. Built here (not yet
+  // awaited) so it can run in parallel with the main orders query below
+  // instead of adding a second sequential round trip to every navigation.
+  const allOrdersQuery = supabase.from("orders").select("status, total_inr, created_at");
+
+  let ordersQuery = supabase
     .from("orders")
-    .select("status, total_inr, created_at");
+    .select(
+      "id, order_number, customer_name, customer_phone, status, total_inr, created_at, order_items(quantity)"
+    )
+    .order("created_at", { ascending: false });
+
+  if (searchParams.status) {
+    ordersQuery = ordersQuery.eq("status", searchParams.status);
+  }
+
+  const [{ data: allOrders }, { data: ordersRaw, error }] = await Promise.all([
+    allOrdersQuery,
+    ordersQuery,
+  ]);
+
   const counts: Record<string, number> = { all: allOrders?.length ?? 0 };
   for (const o of allOrders ?? []) {
     counts[o.status] = (counts[o.status] ?? 0) + 1;
@@ -130,19 +147,9 @@ export default async function OrdersPage({
   const shippedTrend = trend.map((b) => b.shipped);
   const revenueTrend = trend.map((b) => b.revenue);
 
-  let query = supabase
-    .from("orders")
-    .select(
-      "id, order_number, customer_name, customer_phone, status, total_inr, created_at, order_items(quantity)"
-    )
-    .order("created_at", { ascending: false });
-
-  if (searchParams.status) {
-    query = query.eq("status", searchParams.status);
-  }
-
   // Search temporarily disabled — commented out rather than removed so
-  // it's a quick uncomment once it's wanted back, not a rebuild.
+  // it's a quick uncomment once it's wanted back, not a rebuild. Would
+  // need to be applied to `ordersQuery` above, before the Promise.all.
   // const search = searchParams.q?.trim();
   // if (search) {
   //   // Comma is the condition separator in PostgREST's .or() syntax, so a
@@ -150,12 +157,10 @@ export default async function OrdersPage({
   //   // into unintended extra conditions — strip it rather than escape it,
   //   // since a comma in an order number/name/phone was never meaningful.
   //   const term = search.replace(/[%,]/g, "");
-  //   query = query.or(
+  //   ordersQuery = ordersQuery.or(
   //     `order_number.ilike.%${term}%,customer_name.ilike.%${term}%,customer_phone.ilike.%${term}%`
   //   );
   // }
-
-  const { data: ordersRaw, error } = await query;
 
   // Total units across every line item, not just the number of distinct
   // products — an order for "2x Oud Al Mubakhar 6ml" is 2 items, not 1, and
